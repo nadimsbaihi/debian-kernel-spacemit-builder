@@ -78,3 +78,5 @@ RUN PARALLEL="${JOBS}"; \
 RUN mkdir -p /out && cp /build/*.deb /out/
 
 # Keep /build/linux intact for further use (modules_install, dtbs, debugging)
+FROM scratch
+COPY --from=0 /out/ /
