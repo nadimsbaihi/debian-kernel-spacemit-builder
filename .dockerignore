@@ -1,0 +1,5 @@
+output/
+*.deb
+*.rpm
+.git
+README.md
