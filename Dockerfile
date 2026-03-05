@@ -40,6 +40,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN ln -sf /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/ && \
     ln -sf /usr/include/x86_64-linux-gnu/openssl/configuration.h /usr/include/openssl/
 
+# -- 1b. Cross-compile OpenSSL for riscv64 ------------------------------------
+#    Needed by bindeb-pkg since 6.12+ to link sign-file in the headers package
+ARG OPENSSL_VERSION=3.4.0
+RUN cd /tmp && \
+    wget -q https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz && \
+    tar xzf openssl-${OPENSSL_VERSION}.tar.gz && \
+    cd openssl-${OPENSSL_VERSION} && \
+    ./Configure linux-generic64 \
+        --cross-compile-prefix=riscv64-linux-gnu- \
+        --prefix=/usr/riscv64-linux-gnu \
+        --libdir=lib && \
+    make -j$(nproc) && \
+    make install_sw && \
+    rm -rf /tmp/openssl-${OPENSSL_VERSION}*
+
 # -- 2. Clone the patched kernel tree -----------------------------------------
 WORKDIR /build
 RUN git clone --depth 1 -b ${KERNEL_BRANCH} ${KERNEL_REPO} linux
@@ -62,6 +77,4 @@ RUN PARALLEL="${JOBS}"; \
 # -- 5. Collect the .deb output ------------------------------------------------
 RUN mkdir -p /out && cp /build/*.deb /out/
 
-# -- Final stage: slim image with just the debs --------------------------------
-FROM scratch AS export
-COPY --from=builder /out/ /
+# Keep /build/linux intact for further use (modules_install, dtbs, debugging)
