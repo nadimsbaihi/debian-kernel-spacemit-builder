@@ -1,7 +1,7 @@
 FROM debian:bookworm AS builder
 
 ARG KERNEL_BRANCH=linux-6.18.y
-ARG KERNEL_REPO=https://github.com/jmontleon/linux-spacemit.git
+ARG KERNEL_REPO=https://github.com/nadimsbaihi/linux-spacemit.git
 ARG LOCALVERSION=-spacemit
 ARG KDEB_PKGVERSION=6.18.13-1
 ARG JOBS=0
